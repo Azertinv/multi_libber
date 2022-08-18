@@ -30,15 +30,17 @@ def main():
             os.system("ar x "+library)
 
             # parse all the object files
+            print("parsing obj files")
             objs = []
             for obj_filename in os.listdir():
                 objs.append(lief.parse(obj_filename))
 
             # retrieve all the symbols that needs patching
+            print("retrieving functions")
             functions = []
             if args.patch:
                 with open(function_list, "r") as fn_list:
-                    functions = fn_list.readlines().split("\n")[:-1]
+                    functions = fn_list.read().split("\n")[:-1]
             else:
                 for obj in objs:
                     for symbol in obj.symbols:
@@ -48,12 +50,14 @@ def main():
                                 functions += [symbol.name]
 
             # patch all the symbols in the archive
+            print("applying patch")
             for obj in objs:
                 for symbol in obj.symbols:
                     if symbol.name in functions:
                         symbol.name = args.prefix + symbol.name
 
             # write the result to disk
+            print("writing result")
             for obj in objs:
                 obj.write(obj.name)
 
